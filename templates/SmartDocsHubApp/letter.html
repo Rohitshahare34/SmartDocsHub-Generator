@@ -1,0 +1,255 @@
+{% extends 'SmartDocsHubApp/base.html' %}
+
+{% block content %}
+<div class="container py-5">
+  <h1 class="text-center mb-4">Letter Generator</h1>
+  <div class="row mb-4">
+    <div class="col-12">
+      <h4 class="mb-3">1. Select a Letter Template</h4>
+      <div class="row justify-content-center flex-nowrap" id="letter-template-selection" style="gap: 2rem;">
+        <div class="col-auto">
+          <div class="letter-template-thumb letter-thumb-1 selected d-flex align-items-center justify-content-center" data-template="1" style="min-width: 320px; min-height: 140px; border-radius: 1.5rem; border: 3px solid #a084e8; box-shadow: 0 0 16px 0 #a084e888; background: linear-gradient(120deg, #f8fafc 60%, #e0c3fc 100%); color: #4a4e69; font-size: 1.5rem; font-weight: bold;">Classic Formal</div>
+        </div>
+        <div class="col-auto">
+          <div class="letter-template-thumb letter-thumb-2 d-flex align-items-center justify-content-center" data-template="2" style="min-width: 320px; min-height: 140px; border-radius: 1.5rem; border: 3px solid #00ffd0; box-shadow: 0 0 16px 0 #00ffd088; background: linear-gradient(120deg, #e0f7fa 60%, #b3c6ff 100%); color: #1976d2; font-size: 1.5rem; font-weight: bold;">Modern Blue</div>
+        </div>
+        <div class="col-auto">
+          <div class="letter-template-thumb letter-thumb-3 d-flex align-items-center justify-content-center" data-template="3" style="min-width: 320px; min-height: 140px; border-radius: 1.5rem; border: 3px solid #00ffd0; box-shadow: 0 0 16px 0 #00ffd088; background: linear-gradient(120deg, #f3e8ff 60%, #c3aed6 100%); color: #7c3aed; font-size: 1.5rem; font-weight: bold;">Elegant Purple</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="row justify-content-center align-items-center mb-5">
+    <div class="col-lg-7 col-12 mb-4">
+      <div class="letter-preview-wrapper mx-auto">
+        <canvas id="letter-canvas" width="600" height="400" style="border-radius: 1.5rem; box-shadow: 0 8px 32px 0 #00ffd0cc, 0 2px 12px 0 #fff2; border: 2.5px solid #00ffd0; background: #fff; width: 100%; max-width: 600px; height: auto;"></canvas>
+      </div>
+    </div>
+    <div class="col-lg-5 col-12">
+      <form id="letter-form" class="p-4 rounded bg-dark text-light shadow-sm">
+        <div class="mb-3">
+          <label class="form-label">Recipient Name</label>
+          <input type="text" name="recipient" class="form-control" placeholder="Enter recipient name" required>
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Date</label>
+          <input type="date" name="date" class="form-control" required>
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Subject</label>
+          <input type="text" name="subject" class="form-control" placeholder="Enter subject" required>
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Message</label>
+          <textarea name="message" class="form-control" rows="4" placeholder="Enter your message" required></textarea>
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Sender</label>
+          <input type="text" name="sender" class="form-control" placeholder="Enter sender name" required>
+        </div>
+        <button type="button" id="show-letter-preview-btn" class="btn btn-secondary mt-2 w-100">Show Preview</button>
+        <button type="submit" class="btn btn-info mt-2 w-100">Download Letter (PDF)</button>
+      </form>
+    </div>
+  </div>
+</div>
+<style>
+.letter-preview-wrapper {
+  width: 100%;
+  max-width: 600px;
+  margin: 0 auto;
+  background: none;
+}
+.letter-template-thumb {
+  border-radius: 1rem;
+  border: 2.5px solid #00ffd0;
+  box-shadow: 0 2px 12px 0 #00ffd055;
+  background: #fff;
+  height: 120px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1em;
+  cursor: pointer;
+  transition: box-shadow 0.18s, border 0.18s, transform 0.18s;
+  margin-bottom: 0.5rem;
+  position: relative;
+  overflow: hidden;
+}
+.letter-template-thumb.selected, .letter-template-thumb:hover {
+  border: 2.5px solid #7c3aed;
+  box-shadow: 0 8px 32px 0 #7c3aed55, 0 2px 12px 0 #fff2;
+  transform: scale(1.04);
+}
+.letter-thumb-1 { background: linear-gradient(120deg, #f8fafc 60%, #e0c3fc 100%); color: #4a4e69; }
+.letter-thumb-2 { background: linear-gradient(120deg, #e0f7fa 60%, #b3c6ff 100%); color: #1976d2; }
+.letter-thumb-3 { background: linear-gradient(120deg, #f3e8ff 60%, #c3aed6 100%); color: #7c3aed; }
+</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script>
+const canvas = document.getElementById('letter-canvas');
+const ctx = canvas.getContext('2d');
+const form = document.getElementById('letter-form');
+let selectedTemplate = 1;
+const templateThumbs = document.querySelectorAll('.letter-template-thumb');
+templateThumbs.forEach(thumb => {
+  thumb.addEventListener('click', () => {
+    templateThumbs.forEach(t => t.classList.remove('selected'));
+    thumb.classList.add('selected');
+    selectedTemplate = parseInt(thumb.getAttribute('data-template'));
+    drawLetter(getFormData());
+  });
+});
+
+function drawLetter({recipient, date, subject, message, sender, template}) {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  if ((template || selectedTemplate) == 1) {
+    // Classic Formal
+    const grad = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+    grad.addColorStop(0, '#f8fafc');
+    grad.addColorStop(1, '#e0c3fc');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.strokeStyle = '#00ffd0';
+    ctx.lineWidth = 5;
+    ctx.strokeRect(10, 10, canvas.width-20, canvas.height-20);
+    ctx.font = '1.1rem Segoe UI, Arial, sans-serif';
+    ctx.fillStyle = '#4a4e69';
+    ctx.textAlign = 'right';
+    ctx.fillText(date ? date : 'YYYY-MM-DD', canvas.width-40, 50);
+    ctx.font = 'bold 1.2rem Segoe UI, Arial, sans-serif';
+    ctx.fillStyle = '#22223b';
+    ctx.textAlign = 'left';
+    ctx.fillText(recipient ? `To: ${recipient}` : 'To: Recipient Name', 40, 90);
+    ctx.font = 'italic 1.1rem Segoe UI, Arial, sans-serif';
+    ctx.fillStyle = '#7c3aed';
+    ctx.fillText(subject ? `Subject: ${subject}` : 'Subject: ...', 40, 120);
+    ctx.font = '1.1rem Segoe UI, Arial, sans-serif';
+    ctx.fillStyle = '#22223b';
+    ctx.textAlign = 'left';
+    const msg = message || 'Your message goes here. Write your letter content.';
+    const lines = wrapText(msg, 60);
+    let y = 160;
+    for (let line of lines) {
+      ctx.fillText(line, 40, y);
+      y += 28;
+    }
+    ctx.font = 'bold 1.1rem Segoe UI, Arial, sans-serif';
+    ctx.fillStyle = '#4a4e69';
+    ctx.textAlign = 'right';
+    ctx.fillText(sender ? sender : 'Sender Name', canvas.width-40, canvas.height-40);
+  } else if ((template || selectedTemplate) == 2) {
+    // Modern Blue
+    ctx.fillStyle = '#e0f7fa';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.strokeStyle = '#1976d2';
+    ctx.lineWidth = 6;
+    ctx.strokeRect(18, 18, canvas.width-36, canvas.height-36);
+    ctx.font = '1.2rem Segoe UI, Arial, sans-serif';
+    ctx.fillStyle = '#1976d2';
+    ctx.textAlign = 'center';
+    ctx.fillText('Letter', canvas.width/2, 60);
+    ctx.font = '1.1rem Segoe UI, Arial, sans-serif';
+    ctx.fillStyle = '#22223b';
+    ctx.textAlign = 'left';
+    ctx.fillText(date ? `Date: ${date}` : 'Date: YYYY-MM-DD', 40, 110);
+    ctx.fillText(recipient ? `To: ${recipient}` : 'To: Recipient Name', 40, 150);
+    ctx.font = 'italic 1.1rem Segoe UI, Arial, sans-serif';
+    ctx.fillStyle = '#1976d2';
+    ctx.fillText(subject ? `Subject: ${subject}` : 'Subject: ...', 40, 180);
+    ctx.font = '1.1rem Segoe UI, Arial, sans-serif';
+    ctx.fillStyle = '#22223b';
+    ctx.textAlign = 'left';
+    const msg = message || 'Your message goes here. Write your letter content.';
+    const lines = wrapText(msg, 60);
+    let y = 220;
+    for (let line of lines) {
+      ctx.fillText(line, 40, y);
+      y += 28;
+    }
+    ctx.font = 'bold 1.1rem Segoe UI, Arial, sans-serif';
+    ctx.fillStyle = '#1976d2';
+    ctx.textAlign = 'right';
+    ctx.fillText(sender ? sender : 'Sender Name', canvas.width-40, canvas.height-40);
+  } else {
+    // Elegant Purple
+    ctx.fillStyle = '#f3e8ff';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.strokeStyle = '#7c3aed';
+    ctx.lineWidth = 6;
+    ctx.strokeRect(18, 18, canvas.width-36, canvas.height-36);
+    ctx.font = '1.2rem Pacifico, Segoe Script, cursive';
+    ctx.fillStyle = '#7c3aed';
+    ctx.textAlign = 'center';
+    ctx.fillText('Elegant Letter', canvas.width/2, 60);
+    ctx.font = '1.1rem Segoe UI, Arial, sans-serif';
+    ctx.fillStyle = '#22223b';
+    ctx.textAlign = 'left';
+    ctx.fillText(date ? `Date: ${date}` : 'Date: YYYY-MM-DD', 40, 110);
+    ctx.fillText(recipient ? `To: ${recipient}` : 'To: Recipient Name', 40, 150);
+    ctx.font = 'italic 1.1rem Segoe UI, Arial, sans-serif';
+    ctx.fillStyle = '#7c3aed';
+    ctx.fillText(subject ? `Subject: ${subject}` : 'Subject: ...', 40, 180);
+    ctx.font = '1.1rem Segoe UI, Arial, sans-serif';
+    ctx.fillStyle = '#22223b';
+    ctx.textAlign = 'left';
+    const msg = message || 'Your message goes here. Write your letter content.';
+    const lines = wrapText(msg, 60);
+    let y = 220;
+    for (let line of lines) {
+      ctx.fillText(line, 40, y);
+      y += 28;
+    }
+    ctx.font = 'bold 1.1rem Segoe UI, Arial, sans-serif';
+    ctx.fillStyle = '#7c3aed';
+    ctx.textAlign = 'right';
+    ctx.fillText(sender ? sender : 'Sender Name', canvas.width-40, canvas.height-40);
+  }
+}
+
+function wrapText(text, maxLen) {
+  const words = text.split(' ');
+  let lines = [], line = '';
+  for (let word of words) {
+    if ((line + word).length > maxLen) {
+      lines.push(line);
+      line = '';
+    }
+    line += word + ' ';
+  }
+  if (line) lines.push(line);
+  return lines;
+}
+
+function getFormData() {
+  return {
+    recipient: form.recipient.value,
+    date: form.date.value,
+    subject: form.subject.value,
+    message: form.message.value,
+    sender: form.sender.value,
+    template: selectedTemplate
+  };
+}
+
+drawLetter({});
+
+form.addEventListener('input', () => {
+  drawLetter(getFormData());
+});
+
+document.getElementById('show-letter-preview-btn').addEventListener('click', function(e) {
+  e.preventDefault();
+  drawLetter(getFormData());
+});
+
+form.addEventListener('submit', function(e) {
+  e.preventDefault();
+  // Download the canvas as a PDF
+  const canvasImg = canvas.toDataURL('image/png');
+  const pdf = new window.jspdf.jsPDF({ orientation: 'landscape', unit: 'pt', format: [canvas.width, canvas.height] });
+  pdf.addImage(canvasImg, 'PNG', 0, 0, canvas.width, canvas.height);
+  pdf.save('letter.pdf');
+});
+</script>
+{% endblock %} 

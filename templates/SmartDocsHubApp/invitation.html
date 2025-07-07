@@ -1,0 +1,284 @@
+{% extends 'SmartDocsHubApp/base.html' %}
+
+{% block content %}
+<div class="container py-5">
+  <h1 class="text-center mb-4">Invitation Generator</h1>
+  <div class="row mb-4">
+    <div class="col-12">
+      <h4 class="mb-3">1. Select an Invitation Template</h4>
+      <div class="row justify-content-center" id="inv-template-selection">
+        <div class="col-md-3 col-6 mb-3">
+          <div class="inv-template-thumb inv-thumb-1 selected" data-template="1">
+            <span class="fw-bold">Glassy Geometric</span>
+          </div>
+        </div>
+        <div class="col-md-3 col-6 mb-3">
+          <div class="inv-template-thumb inv-thumb-2" data-template="2">
+            <span class="fw-bold">Elegant Gradient</span>
+          </div>
+        </div>
+        <div class="col-md-3 col-6 mb-3">
+          <div class="inv-template-thumb inv-thumb-3" data-template="3">
+            <span class="fw-bold">Bold Modern</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="row justify-content-center align-items-center mb-5">
+    <div class="col-lg-7 col-12 mb-4">
+      <!-- Live Invitation Card Preview (Canvas) -->
+      <div class="invitation-preview-wrapper mx-auto">
+        <canvas id="invitation-canvas" width="600" height="350" style="border-radius: 2rem; box-shadow: 0 8px 32px 0 #00ffd0cc, 0 2px 12px 0 #fff2; border: 2.5px solid #00ffd0; background: #fff; width: 100%; max-width: 600px; height: auto;"></canvas>
+      </div>
+    </div>
+    <div class="col-lg-5 col-12">
+      <form id="invitation-form" class="p-4 rounded bg-dark text-light shadow-sm">
+        <div class="mb-3">
+          <label class="form-label">Event Name</label>
+          <input type="text" name="event_name" class="form-control" placeholder="Enter event name" required>
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Date</label>
+          <input type="date" name="date" class="form-control" required>
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Venue</label>
+          <input type="text" name="venue" class="form-control" placeholder="Enter venue" required>
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Organizer</label>
+          <input type="text" name="organizer" class="form-control" placeholder="Enter organizer name" required>
+        </div>
+        <button type="button" id="show-inv-preview-btn" class="btn btn-secondary mt-2 w-100">Show Preview</button>
+        <button type="submit" class="btn btn-info mt-2 w-100">Download Invitation (PDF)</button>
+      </form>
+    </div>
+  </div>
+</div>
+<!-- Info Box -->
+<div class="container mb-4">
+  <div class="glassy-card p-4 text-center mt-5" style="max-width:600px; margin:0 auto;">
+    <h5 class="fw-bold mb-2" style="color:#7c3aed;">About Invitations</h5>
+    <div style="color:#bfc9d1; font-size:1.1em;">
+      <b>What you can do here:</b><br>
+      Design and send beautiful invitations for any event—parties, meetings, weddings, and more.<br><br>
+      <b>Features:</b><br>
+      • Select from 3 creative, modern invitation templates.<br>
+      • Fill in event name, date, venue, and organizer details.<br>
+      • See a live preview as you type—your invitation updates instantly.<br>
+      • Download your invitation as a high-quality image (PNG).<br>
+      • Bulk creation: Generate invitations for multiple recipients at once.<br>
+      • Email sending: Send invitations directly to your guest list.<br><br>
+      <b>Best for:</b> Event organizers, parties, weddings, corporate events, and more.<br>
+      <b>Tip:</b> Use the bulk and email features to invite everyone in seconds!
+    </div>
+  </div>
+</div>
+<style>
+.inv-template-thumb {
+  border-radius: 1rem;
+  border: 2.5px solid #00ffd0;
+  box-shadow: 0 2px 12px 0 #00ffd055;
+  background: #fff;
+  height: 120px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1em;
+  cursor: pointer;
+  transition: box-shadow 0.18s, border 0.18s, transform 0.18s;
+  margin-bottom: 0.5rem;
+  position: relative;
+  overflow: hidden;
+}
+.inv-template-thumb.selected, .inv-template-thumb:hover {
+  border: 2.5px solid #7c3aed;
+  box-shadow: 0 8px 32px 0 #7c3aed55, 0 2px 12px 0 #fff2;
+  transform: scale(1.04);
+}
+.inv-thumb-1 { background: linear-gradient(120deg, #e0f7fa 60%, #b3c6ff 100%); color: #1976d2; }
+.inv-thumb-2 { background: linear-gradient(120deg, #f3e8ff 60%, #c3aed6 100%); color: #7c3aed; }
+.inv-thumb-3 { background: linear-gradient(120deg, #ffe0e6 60%, #ffd6a6 100%); color: #e53935; }
+.invitation-preview-wrapper {
+  width: 100%;
+  max-width: 600px;
+  margin: 0 auto;
+  background: none;
+}
+</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script>
+const canvas = document.getElementById('invitation-canvas');
+const ctx = canvas.getContext('2d');
+const form = document.getElementById('invitation-form');
+const templateThumbs = document.querySelectorAll('.inv-template-thumb');
+let selectedTemplate = 1;
+
+function drawInvitationCard({event_name, date, venue, organizer, template}) {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  if (template == 1) {
+    // Glassy Geometric
+    // Background
+    const grad = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+    grad.addColorStop(0, '#e0f7fa');
+    grad.addColorStop(1, '#b3c6ff');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    // Glass panel
+    ctx.save();
+    ctx.globalAlpha = 0.7;
+    ctx.fillStyle = '#fff';
+    ctx.fillRect(40, 40, 520, 270);
+    ctx.restore();
+    // Geometric accents
+    ctx.save();
+    ctx.fillStyle = '#00ffd0';
+    ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(80,0); ctx.lineTo(0,80); ctx.closePath(); ctx.fill();
+    ctx.fillStyle = '#1976d2';
+    ctx.beginPath(); ctx.moveTo(600,350); ctx.lineTo(520,350); ctx.lineTo(600,270); ctx.closePath(); ctx.fill();
+    ctx.restore();
+    // Title
+    ctx.font = 'bold 2rem Segoe UI, Arial, sans-serif';
+    ctx.fillStyle = '#1976d2';
+    ctx.textAlign = 'center';
+    ctx.fillText(event_name || 'Event Name', canvas.width/2, 100);
+    // Date
+    ctx.font = '1.1rem Segoe UI, Arial, sans-serif';
+    ctx.fillStyle = '#222';
+    ctx.fillText(date ? `Date: ${date}` : 'Date: YYYY-MM-DD', canvas.width/2, 150);
+    // Venue
+    ctx.font = '1.1rem Segoe UI, Arial, sans-serif';
+    ctx.fillStyle = '#222';
+    ctx.fillText(venue ? `Venue: ${venue}` : 'Venue: Main Hall', canvas.width/2, 190);
+    // Organizer
+    ctx.font = '1.1rem Segoe UI, Arial, sans-serif';
+    ctx.fillStyle = '#1976d2';
+    ctx.fillText(organizer ? `Organized by: ${organizer}` : 'Organized by: Your Organization', canvas.width/2, 230);
+    // Footer
+    ctx.font = 'italic 1.1rem Segoe UI, Arial, sans-serif';
+    ctx.fillStyle = '#00ffd0';
+    ctx.fillText('You are cordially invited!', canvas.width/2, 280);
+  } else if (template == 2) {
+    // Elegant Gradient
+    // Background
+    const grad = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+    grad.addColorStop(0, '#f8fafc');
+    grad.addColorStop(1, '#e0c3fc');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    // Soft border
+    ctx.strokeStyle = '#c3aed6';
+    ctx.lineWidth = 6;
+    ctx.strokeRect(18, 18, canvas.width-36, canvas.height-36);
+    // Title
+    ctx.font = 'bold 2.2rem Pacifico, Segoe Script, cursive';
+    ctx.fillStyle = '#7c3aed';
+    ctx.textAlign = 'center';
+    ctx.fillText(event_name || 'Event Name', canvas.width/2, 90);
+    // Date
+    ctx.font = '1.2rem Segoe UI, Arial, sans-serif';
+    ctx.fillStyle = '#222';
+    ctx.fillText(date ? `Date: ${date}` : 'Date: YYYY-MM-DD', canvas.width/2, 140);
+    // Venue
+    ctx.font = '1.2rem Segoe UI, Arial, sans-serif';
+    ctx.fillStyle = '#222';
+    ctx.fillText(venue ? `Venue: ${venue}` : 'Venue: Main Hall', canvas.width/2, 180);
+    // Organizer
+    ctx.font = '1.2rem Segoe UI, Arial, sans-serif';
+    ctx.fillStyle = '#7c3aed';
+    ctx.fillText(organizer ? `Organized by: ${organizer}` : 'Organized by: Your Organization', canvas.width/2, 220);
+    // Decorative line
+    ctx.strokeStyle = '#7c3aed';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(120, 250);
+    ctx.lineTo(canvas.width-120, 250);
+    ctx.stroke();
+    // Footer
+    ctx.font = 'italic 1.1rem Segoe UI, Arial, sans-serif';
+    ctx.fillStyle = '#7c3aed';
+    ctx.fillText('You are cordially invited!', canvas.width/2, 290);
+  } else {
+    // Bold Modern
+    // Background
+    ctx.fillStyle = '#ffe0e6';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    // Bold border
+    ctx.strokeStyle = '#e53935';
+    ctx.lineWidth = 8;
+    ctx.strokeRect(12, 12, canvas.width-24, canvas.height-24);
+    // Accent shapes
+    ctx.save();
+    ctx.fillStyle = '#ffd6a6';
+    ctx.beginPath(); ctx.arc(60, 60, 40, 0, 2*Math.PI); ctx.fill();
+    ctx.fillStyle = '#e53935';
+    ctx.beginPath(); ctx.arc(540, 290, 30, 0, 2*Math.PI); ctx.fill();
+    ctx.restore();
+    // Title
+    ctx.font = 'bold 2rem Segoe UI, Arial, sans-serif';
+    ctx.fillStyle = '#e53935';
+    ctx.textAlign = 'center';
+    ctx.fillText(event_name || 'Event Name', canvas.width/2, 100);
+    // Date
+    ctx.font = '1.1rem Segoe UI, Arial, sans-serif';
+    ctx.fillStyle = '#222';
+    ctx.fillText(date ? `Date: ${date}` : 'Date: YYYY-MM-DD', canvas.width/2, 150);
+    // Venue
+    ctx.font = '1.1rem Segoe UI, Arial, sans-serif';
+    ctx.fillStyle = '#222';
+    ctx.fillText(venue ? `Venue: ${venue}` : 'Venue: Main Hall', canvas.width/2, 190);
+    // Organizer
+    ctx.font = '1.1rem Segoe UI, Arial, sans-serif';
+    ctx.fillStyle = '#e53935';
+    ctx.fillText(organizer ? `Organized by: ${organizer}` : 'Organized by: Your Organization', canvas.width/2, 230);
+    // Footer
+    ctx.font = 'italic 1.1rem Segoe UI, Arial, sans-serif';
+    ctx.fillStyle = '#e53935';
+    ctx.fillText('You are cordially invited!', canvas.width/2, 280);
+  }
+}
+
+function getFormData() {
+  return {
+    event_name: form.event_name.value,
+    date: form.date.value,
+    venue: form.venue.value,
+    organizer: form.organizer.value,
+    template: selectedTemplate
+  };
+}
+
+templateThumbs.forEach(thumb => {
+  thumb.addEventListener('click', () => {
+    templateThumbs.forEach(t => t.classList.remove('selected'));
+    thumb.classList.add('selected');
+    selectedTemplate = parseInt(thumb.getAttribute('data-template'));
+    drawInvitationCard(getFormData());
+  });
+});
+
+// Initial draw
+// Default to template 1
+selectedTemplate = 1;
+drawInvitationCard({template: 1});
+
+form.addEventListener('input', () => {
+  drawInvitationCard(getFormData());
+});
+
+document.getElementById('show-inv-preview-btn').addEventListener('click', function(e) {
+  e.preventDefault();
+  drawInvitationCard(getFormData());
+});
+
+form.addEventListener('submit', function(e) {
+  e.preventDefault();
+  // Download the canvas as a PDF
+  const canvasImg = canvas.toDataURL('image/png');
+  const pdf = new window.jspdf.jsPDF({ orientation: 'landscape', unit: 'pt', format: [canvas.width, canvas.height] });
+  pdf.addImage(canvasImg, 'PNG', 0, 0, canvas.width, canvas.height);
+  pdf.save('invitation.pdf');
+});
+</script>
+{% endblock %} 

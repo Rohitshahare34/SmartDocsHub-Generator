@@ -1,0 +1,525 @@
+{% extends 'SmartDocsHubApp/base.html' %}
+
+{% block content %}
+<div class="container py-5">
+  <h1 class="text-center mb-4">Certificate Generator</h1>
+  <div class="row mb-4">
+    <div class="col-12">
+      <h4 class="mb-3">1. Select a Certificate Template</h4>
+      <div class="row justify-content-center" id="template-selection">
+        <div class="col-md-3 col-6 mb-3">
+          <div class="cert-template-thumb template-thumb-1 selected" data-template="1">
+            <span class="fw-bold">Classic Gold</span>
+          </div>
+        </div>
+        <div class="col-md-3 col-6 mb-3">
+          <div class="cert-template-thumb template-thumb-2" data-template="2">
+            <span class="fw-bold">Blue Modern</span>
+          </div>
+        </div>
+        <div class="col-md-3 col-6 mb-3">
+          <div class="cert-template-thumb template-thumb-3" data-template="3">
+            <span class="fw-bold">Elegant Purple</span>
+          </div>
+        </div>
+        <div class="col-md-3 col-6 mb-3">
+          <div class="cert-template-thumb template-thumb-4" data-template="4">
+            <span class="fw-bold">Blue-Gold Modern</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="row justify-content-center align-items-center mb-5">
+    <div class="col-lg-7 col-12 mb-4">
+      <div class="certificate-preview-wrapper mx-auto">
+        <canvas id="certificate-canvas" width="700" height="500" style="border-radius: 1.5rem; box-shadow: 0 8px 32px 0 #00ffd0cc, 0 2px 12px 0 #fff2; border: 2.5px solid #00ffd0; background: #fff; width: 100%; max-width: 700px; height: auto;"></canvas>
+      </div>
+    </div>
+    <div class="col-lg-5 col-12">
+      <form id="certificate-form" class="p-4 rounded bg-dark text-light shadow-sm">
+        <div class="mb-3">
+          <label class="form-label">Recipient Name</label>
+          <input type="text" name="name" class="form-control" placeholder="Enter recipient name" required>
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Course / Award</label>
+          <input type="text" name="course" class="form-control" placeholder="Enter course or award" required>
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Date</label>
+          <input type="date" name="date" class="form-control" required>
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Description</label>
+          <textarea name="description" class="form-control" placeholder="Enter certificate description" rows="2"></textarea>
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Left Signature Name</label>
+          <input type="text" name="sig_left" class="form-control" placeholder="e.g. Principal" required>
+            </div>
+        <div class="mb-3">
+          <label class="form-label">Right Signature Name</label>
+          <input type="text" name="sig_right" class="form-control" placeholder="e.g. Director" required>
+            </div>
+        <button type="button" id="show-preview-btn" class="btn btn-secondary mt-2 w-100">Show Preview</button>
+        <button type="submit" class="btn btn-info mt-2 w-100">Download Certificate (PDF)</button>
+      </form>
+    </div>
+    </div>
+</div>
+<!-- Info Box -->
+<div class="container mb-4">
+  <div class="glassy-card p-4 text-center mt-5" style="max-width:700px; margin:0 auto;">
+    <h5 class="fw-bold mb-2" style="color:#00ffd0;">About Certificates</h5>
+    <div style="color:#bfc9d1; font-size:1.1em;">
+      <b>What you can do here:</b><br>
+      Instantly generate professional certificates for events, courses, achievements, and more.<br><br>
+      <b>Features:</b><br>
+      • Choose from 4 modern, realistic certificate templates.<br>
+      • Fill in recipient name, course/award, date, and custom signature names.<br>
+      • See a live preview as you type—what you see is what you get.<br>
+      • Download your certificate as a high-quality PDF (filename auto-set to recipient name).<br>
+      • Add custom signature lines for authenticity.<br>
+      • Bulk upload: Generate many certificates at once from a spreadsheet.<br>
+      • Email delivery: Send certificates directly to recipients in bulk.<br><br>
+      <b>Best for:</b> Schools, colleges, events, workshops, online courses, and organizations.<br>
+      <b>Tip:</b> Use the bulk upload and email features to save hours when handling large groups!
+    </div>
+  </div>
+</div>
+<style>
+.cert-template-thumb {
+  border-radius: 1rem;
+  border: 2.5px solid #00ffd0;
+  box-shadow: 0 2px 12px 0 #00ffd055;
+  background: #fff;
+  height: 120px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1em;
+  cursor: pointer;
+  transition: box-shadow 0.18s, border 0.18s, transform 0.18s;
+  margin-bottom: 0.5rem;
+  position: relative;
+  overflow: hidden;
+}
+.cert-template-thumb.selected, .cert-template-thumb:hover {
+  border: 2.5px solid #7c3aed;
+  box-shadow: 0 8px 32px 0 #7c3aed55, 0 2px 12px 0 #fff2;
+  transform: scale(1.04);
+}
+.template-thumb-1 { background: linear-gradient(120deg, #fffbe6 60%, #ffe0a6 100%); color: #bfa14a; }
+.template-thumb-2 { background: linear-gradient(120deg, #e0f7fa 60%, #b3c6ff 100%); color: #1976d2; }
+.template-thumb-3 { background: linear-gradient(120deg, #f3e8ff 60%, #c3aed6 100%); color: #7c3aed; }
+.template-thumb-4 { background: linear-gradient(120deg, #e3eafc 60%, #ffe0a6 100%); color: #1a365d; }
+.certificate-preview-wrapper {
+  width: 100%;
+  max-width: 700px;
+  margin: 0 auto;
+  background: none;
+}
+</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script>
+const canvas = document.getElementById('certificate-canvas');
+const ctx = canvas.getContext('2d');
+const form = document.getElementById('certificate-form');
+const templateThumbs = document.querySelectorAll('.cert-template-thumb');
+let selectedTemplate = 1;
+
+function drawCertificate({name, course, date, description, sig_left, sig_right, template}) {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  if (template == 1) {
+    // Modern Realistic (like provided image)
+    // 1. Background
+    ctx.fillStyle = '#f4f6fa';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    // 2. Geometric colored border accents
+    ctx.save();
+    ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(0,500); ctx.lineTo(60,500); ctx.lineTo(60,0); ctx.closePath(); ctx.fillStyle = '#1a365d'; ctx.fill();
+    ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(0,500); ctx.lineTo(20,500); ctx.lineTo(20,0); ctx.closePath(); ctx.fillStyle = '#f9b233'; ctx.fill();
+    ctx.beginPath(); ctx.moveTo(700,0); ctx.lineTo(700,500); ctx.lineTo(640,500); ctx.lineTo(640,0); ctx.closePath(); ctx.fillStyle = '#1a365d'; ctx.fill();
+    ctx.beginPath(); ctx.moveTo(700,0); ctx.lineTo(700,500); ctx.lineTo(680,500); ctx.lineTo(680,0); ctx.closePath(); ctx.fillStyle = '#f9b233'; ctx.fill();
+    ctx.restore();
+    // 3. Main white panel
+    ctx.fillStyle = '#fff';
+    ctx.fillRect(40, 40, 620, 420);
+    // 4. Inner border
+    ctx.strokeStyle = '#bfc9d1';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(50, 50, 600, 400);
+    // 5. Title
+    ctx.font = 'bold 2.2rem serif';
+    ctx.fillStyle = '#222';
+    ctx.textAlign = 'center';
+    ctx.fillText('CERTIFICATE', canvas.width/2, 100);
+    ctx.font = '1.2rem serif';
+    ctx.fillStyle = '#555';
+    ctx.fillText('OF ACHIEVEMENT', canvas.width/2, 130);
+    // 6. Subtitle
+    ctx.font = '1rem Segoe UI, Arial, sans-serif';
+    ctx.fillStyle = '#888';
+    ctx.textAlign = 'center';
+    ctx.fillText('This certificate is proudly presented to', canvas.width/2, 170);
+    // 7. Recipient Name
+    ctx.font = '2.2rem Pacifico, Segoe Script, cursive';
+    ctx.fillStyle = '#1a365d';
+    ctx.fillText(name || 'Name Surname', canvas.width/2, 220);
+    // 8. Signature lines
+    ctx.strokeStyle = '#1a365d';
+    ctx.lineWidth = 1.5;
+    // Left signature line
+    ctx.beginPath(); ctx.moveTo(120, 420); ctx.lineTo(260, 420); ctx.stroke();
+    // Left squiggly signature
+    ctx.save();
+    ctx.strokeStyle = '#888';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(140, 415);
+    ctx.bezierCurveTo(155, 410, 180, 430, 210, 415);
+    ctx.bezierCurveTo(220, 410, 240, 430, 250, 415);
+    ctx.stroke();
+    ctx.restore();
+    // Right signature line
+    ctx.beginPath(); ctx.moveTo(440, 420); ctx.lineTo(580, 420); ctx.stroke();
+    // Right squiggly signature
+    ctx.save();
+    ctx.strokeStyle = '#888';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(460, 415);
+    ctx.bezierCurveTo(475, 410, 500, 430, 530, 415);
+    ctx.bezierCurveTo(540, 410, 570, 430, 575, 415);
+    ctx.stroke();
+    ctx.restore();
+    ctx.font = '1rem Segoe UI, Arial, sans-serif';
+    ctx.fillStyle = '#222';
+    ctx.textAlign = 'left';
+    ctx.fillText(sig_left || 'Signature', 120, 440);
+    ctx.textAlign = 'right';
+    ctx.fillText(sig_right || 'Signature', 580, 440);
+    // 9. Date
+    ctx.font = '1rem Segoe UI, Arial, sans-serif';
+    ctx.fillStyle = '#888';
+    ctx.textAlign = 'center';
+    ctx.fillText(date ? `Date: ${date}` : 'Date: YYYY-MM-DD', canvas.width/2, 470);
+  } else if (template == 2) {
+    // Red/Black/Gold Modern (like new provided image)
+    // 1. Background
+    ctx.fillStyle = '#fff';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    // 2. Geometric colored border accents
+    ctx.save();
+    // Red top left
+    ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(0,500); ctx.lineTo(120,500); ctx.lineTo(120,0); ctx.closePath(); ctx.fillStyle = '#e53935'; ctx.fill();
+    // Red bottom right
+    ctx.beginPath(); ctx.moveTo(700,500); ctx.lineTo(700,0); ctx.lineTo(580,0); ctx.lineTo(580,500); ctx.closePath(); ctx.fillStyle = '#e53935'; ctx.fill();
+    // Black top
+    ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(700,0); ctx.lineTo(700,30); ctx.lineTo(0,30); ctx.closePath(); ctx.fillStyle = '#222'; ctx.fill();
+    // Black left
+    ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(0,500); ctx.lineTo(30,500); ctx.lineTo(30,0); ctx.closePath(); ctx.fillStyle = '#222'; ctx.fill();
+    ctx.restore();
+    // 3. Gold border
+    ctx.strokeStyle = '#f9b233';
+    ctx.lineWidth = 3;
+    ctx.strokeRect(18, 18, canvas.width-36, canvas.height-36);
+    // 4. Main white panel (for effect)
+    ctx.save();
+    ctx.globalAlpha = 0.85;
+    ctx.fillStyle = '#fff';
+    ctx.fillRect(40, 40, 620, 420);
+    ctx.restore();
+    // 5. Badge/ribbon (left)
+    // 6. Title
+    ctx.font = 'bold 2.1rem serif';
+    ctx.fillStyle = '#222';
+    ctx.textAlign = 'right';
+    ctx.fillText('CERTIFICATE', 610, 100);
+    ctx.font = '1.1rem serif';
+    ctx.fillStyle = '#555';
+    ctx.fillText('OF APPRECIATION', 610, 130);
+    // 7. Subtitle
+    ctx.font = 'bold 1rem Segoe UI, Arial, sans-serif';
+    ctx.fillStyle = '#222';
+    ctx.textAlign = 'center';
+    ctx.fillText('This certificate is proudly presented to', canvas.width/2, 170);
+    // 8. Recipient Name
+    ctx.font = '2.2rem Pacifico, Segoe Script, cursive';
+    ctx.fillStyle = '#e53935';
+    ctx.fillText(name || 'Name Surname', canvas.width/2, 220);
+    // 9. Signature lines
+    ctx.strokeStyle = '#222';
+    ctx.lineWidth = 1.5;
+    // Left signature line
+    ctx.beginPath(); ctx.moveTo(80, 400); ctx.lineTo(260, 400); ctx.stroke();
+    // Left squiggly signature
+    ctx.save();
+    ctx.strokeStyle = '#888';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(100, 395);
+    ctx.bezierCurveTo(115, 390, 140, 410, 170, 395);
+    ctx.bezierCurveTo(180, 390, 200, 410, 210, 395);
+    ctx.stroke();
+    ctx.restore();
+    // Right signature line
+    ctx.beginPath(); ctx.moveTo(440, 400); ctx.lineTo(620, 400); ctx.stroke();
+    // Right squiggly signature
+    ctx.save();
+    ctx.strokeStyle = '#888';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(460, 395);
+    ctx.bezierCurveTo(475, 390, 500, 410, 530, 395);
+    ctx.bezierCurveTo(540, 390, 570, 410, 575, 395);
+    ctx.stroke();
+    ctx.restore();
+    ctx.font = '1rem Segoe UI, Arial, sans-serif';
+    ctx.fillStyle = '#222';
+    ctx.textAlign = 'left';
+    ctx.fillText(sig_left || 'Signature', 80, 420);
+    ctx.textAlign = 'right';
+    ctx.fillText(sig_right || 'Signature', 620, 420);
+  } else if (template == 3) {
+    // Gold/Black Curved Modern (like new provided image)
+    // 1. Background
+    ctx.fillStyle = '#fff';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    // 2. Subtle diagonal lines
+    ctx.save();
+    ctx.globalAlpha = 0.08;
+    for(let i=-canvas.height; i<canvas.width; i+=12) {
+      ctx.beginPath();
+      ctx.moveTo(i,0);
+      ctx.lineTo(i+canvas.height,canvas.height);
+      ctx.strokeStyle = '#bfc9d1';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+    }
+    ctx.restore();
+    // 3. Gold/black curved border (bottom)
+    ctx.save();
+    ctx.beginPath();
+    ctx.moveTo(0,500);
+    ctx.bezierCurveTo(120,420, 580,420, 700,500);
+    ctx.lineTo(700,500);
+    ctx.lineTo(700,470);
+    ctx.bezierCurveTo(580,440, 120,440, 0,470);
+    ctx.closePath();
+    ctx.fillStyle = '#222';
+    ctx.fill();
+    ctx.beginPath();
+    ctx.moveTo(0,500);
+    ctx.bezierCurveTo(140,440, 560,440, 700,500);
+    ctx.lineTo(700,500);
+    ctx.lineTo(700,480);
+    ctx.bezierCurveTo(560,460, 140,460, 0,480);
+    ctx.closePath();
+    ctx.fillStyle = '#f9b233';
+    ctx.fill();
+    ctx.restore();
+    // 4. Gold border (top and sides)
+    ctx.save();
+    ctx.strokeStyle = '#f9b233';
+    ctx.lineWidth = 5;
+    ctx.beginPath();
+    ctx.moveTo(30,60);
+    ctx.lineTo(30,440);
+    ctx.bezierCurveTo(350,480, 350,480, 670,440);
+    ctx.lineTo(670,60);
+    ctx.bezierCurveTo(350,20, 350,20, 30,60);
+    ctx.closePath();
+    ctx.stroke();
+    ctx.restore();
+    // 5. Badge (top left)
+    // 6. Company circle (top right)
+    ctx.save();
+    ctx.beginPath(); ctx.arc(610, 110, 22, 0, 2*Math.PI); ctx.strokeStyle = '#f9b233'; ctx.lineWidth = 4; ctx.stroke();
+    ctx.font = '0.9rem Segoe UI, Arial, sans-serif';
+    ctx.fillStyle = '#222';
+    ctx.textAlign = 'left';
+    ctx.fillText('COMPANY', 640, 105);
+    ctx.fillText('NAME', 640, 120);
+    ctx.restore();
+    // 7. Title
+    ctx.font = 'bold 2.1rem serif';
+    ctx.fillStyle = '#222';
+    ctx.textAlign = 'center';
+    ctx.fillText('CERTIFICATE', canvas.width/2, 120);
+    ctx.font = '1.1rem serif';
+    ctx.fillStyle = '#555';
+    ctx.fillText('OF ACHIEVEMENT', canvas.width/2, 150);
+    // 8. Achievement ribbon
+    ctx.save();
+    ctx.fillStyle = '#f9b233';
+    ctx.fillRect(canvas.width/2-80, 165, 160, 22);
+    ctx.font = '1rem Segoe UI, Arial, sans-serif';
+    ctx.fillStyle = '#222';
+    ctx.textAlign = 'center';
+    ctx.fillText('OF ACHIEVEMENT', canvas.width/2, 182);
+    ctx.restore();
+    // 9. Subtitle
+    ctx.font = 'bold 1rem Segoe UI, Arial, sans-serif';
+    ctx.fillStyle = '#222';
+    ctx.fillText('This certificate is proudly presented to', canvas.width/2, 170);
+    // 10. General line
+    ctx.font = '1.1rem Segoe UI, Arial, sans-serif';
+    ctx.fillStyle = '#222';
+    ctx.fillText('In recognition of outstanding performance, dedication, and achievement.', canvas.width/2, 210);
+    // 11. Recipient Name
+    ctx.font = '2.2rem Pacifico, Segoe Script, cursive';
+    ctx.fillStyle = '#222';
+    ctx.fillText(name || 'Mr. Name Surname', canvas.width/2, 260);
+    // 12. Underline
+    ctx.save();
+    ctx.strokeStyle = '#f9b233';
+    ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.moveTo(canvas.width/2-140, 270); ctx.lineTo(canvas.width/2+140, 270); ctx.stroke();
+    ctx.restore();
+    // 13. Signature lines
+    ctx.strokeStyle = '#222';
+    ctx.lineWidth = 1.5;
+    // Left signature line
+    ctx.beginPath(); ctx.moveTo(80, 400); ctx.lineTo(260, 400); ctx.stroke();
+    // Left squiggly signature
+    ctx.save();
+    ctx.strokeStyle = '#888';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(100, 395);
+    ctx.bezierCurveTo(115, 390, 140, 410, 170, 395);
+    ctx.bezierCurveTo(180, 390, 200, 410, 210, 395);
+    ctx.stroke();
+    ctx.restore();
+    // Right signature line
+    ctx.beginPath(); ctx.moveTo(440, 400); ctx.lineTo(620, 400); ctx.stroke();
+    // Right squiggly signature
+    ctx.save();
+    ctx.strokeStyle = '#888';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(460, 395);
+    ctx.bezierCurveTo(475, 390, 500, 410, 530, 395);
+    ctx.bezierCurveTo(540, 390, 570, 410, 575, 395);
+    ctx.stroke();
+    ctx.restore();
+    ctx.font = '1rem Segoe UI, Arial, sans-serif';
+    ctx.fillStyle = '#222';
+    ctx.textAlign = 'left';
+    ctx.fillText(sig_left || 'Signature', 80, 420);
+    ctx.textAlign = 'right';
+    ctx.fillText(sig_right || 'Signature', 620, 420);
+  } else {
+    // Blue-Gold Modern (like provided image)
+    // 1. Background
+    ctx.fillStyle = '#f7fafd';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    // 2. Geometric blue/gold border accents
+    ctx.save();
+    // Top left blue
+    ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(0,120); ctx.lineTo(120,0); ctx.closePath(); ctx.fillStyle = '#1a365d'; ctx.fill();
+    // Top left gold
+    ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(0,60); ctx.lineTo(60,0); ctx.closePath(); ctx.fillStyle = '#f9b233'; ctx.fill();
+    // Bottom right blue
+    ctx.beginPath(); ctx.moveTo(700,500); ctx.lineTo(700,380); ctx.lineTo(580,500); ctx.closePath(); ctx.fillStyle = '#1a365d'; ctx.fill();
+    // Bottom right gold
+    ctx.beginPath(); ctx.moveTo(700,500); ctx.lineTo(700,440); ctx.lineTo(640,500); ctx.closePath(); ctx.fillStyle = '#f9b233'; ctx.fill();
+    // Top right gold
+    ctx.beginPath(); ctx.moveTo(700,0); ctx.lineTo(700,60); ctx.lineTo(640,0); ctx.closePath(); ctx.fillStyle = '#f9b233'; ctx.fill();
+    // Bottom left gold
+    ctx.beginPath(); ctx.moveTo(0,500); ctx.lineTo(0,440); ctx.lineTo(60,500); ctx.closePath(); ctx.fillStyle = '#f9b233'; ctx.fill();
+    ctx.restore();
+    // 3. Gold inner border
+    ctx.strokeStyle = '#f9b233';
+    ctx.lineWidth = 3;
+    ctx.strokeRect(18, 18, canvas.width-36, canvas.height-36);
+    // 4. Title
+    ctx.font = 'bold 2.2rem serif';
+    ctx.fillStyle = '#bfa14a';
+    ctx.textAlign = 'center';
+    ctx.fillText('Certificate', canvas.width/2, 100);
+    ctx.font = '1.1rem serif';
+    ctx.fillStyle = '#bfa14a';
+    ctx.fillText('OF APPRECIATION', canvas.width/2, 130);
+    // 5. Subtitle
+    ctx.font = '1rem Segoe UI, Arial, sans-serif';
+    ctx.fillStyle = '#1a365d';
+    ctx.fillText('THIS CERTIFICATE IS PROUDLY PRESENTED TO', canvas.width/2, 170);
+    // 6. Recipient Name
+    ctx.font = '2.5rem Pacifico, Segoe Script, cursive';
+    ctx.fillStyle = '#1a365d';
+    ctx.fillText(name || 'Name Surname', canvas.width/2, 220);
+    // 7. Gold underline
+    ctx.strokeStyle = '#f9b233';
+    ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.moveTo(canvas.width/2-120, 230); ctx.lineTo(canvas.width/2+120, 230); ctx.stroke();
+    // 8. Signature lines
+    ctx.strokeStyle = '#1a365d';
+    ctx.lineWidth = 1.5;
+    // Left signature line
+    ctx.beginPath(); ctx.moveTo(120, 420); ctx.lineTo(260, 420); ctx.stroke();
+    // Left squiggly signature
+    ctx.save();
+    ctx.strokeStyle = '#888';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(140, 415);
+    ctx.bezierCurveTo(155, 410, 180, 430, 210, 415);
+    ctx.bezierCurveTo(220, 410, 240, 430, 250, 415);
+    ctx.stroke();
+    ctx.restore();
+    // Right signature line
+    ctx.beginPath(); ctx.moveTo(440, 420); ctx.lineTo(580, 420); ctx.stroke();
+    // Right squiggly signature
+    ctx.save();
+    ctx.strokeStyle = '#888';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(460, 415);
+    ctx.bezierCurveTo(475, 410, 500, 430, 530, 415);
+    ctx.bezierCurveTo(540, 410, 570, 430, 575, 415);
+    ctx.stroke();
+    ctx.restore();
+    ctx.font = '1rem Segoe UI, Arial, sans-serif';
+    ctx.fillStyle = '#222';
+    ctx.textAlign = 'left';
+    ctx.fillText(sig_left || 'Lorem Ipsum', 120, 440);
+    ctx.font = '0.9rem Segoe UI, Arial, sans-serif';
+    ctx.fillText('MANAGER', 120, 460);
+    ctx.textAlign = 'right';
+    ctx.font = '1rem Segoe UI, Arial, sans-serif';
+    ctx.fillText(sig_right || 'Dolor Sit Amet', 580, 440);
+    ctx.font = '0.9rem Segoe UI, Arial, sans-serif';
+    ctx.fillText('DIRECTOR', 580, 460);
+    // 9. Date (bottom center, optional)
+    ctx.font = '1rem Segoe UI, Arial, sans-serif';
+    ctx.fillStyle = '#888';
+    ctx.textAlign = 'center';
+    ctx.fillText(date ? `Date: ${date}` : 'Date: YYYY-MM-DD', canvas.width/2, 470);
+  }
+}
+
+templateThumbs.forEach(thumb => {
+  thumb.addEventListener('click', () => {
+    selectedTemplate = parseInt(thumb.getAttribute('data-template'));
+    drawCertificate({name: '', course: '', date: '', description: '', sig_left: '', sig_right: '', template: selectedTemplate});
+  });
+});
+
+form.addEventListener('submit', (e) => {
+  e.preventDefault();
+  // Download the canvas as a PDF
+  const name = document.querySelector('input[name="name"]').value || 'certificate';
+  const canvasImg = canvas.toDataURL('image/png');
+  const pdf = new window.jspdf.jsPDF({ orientation: 'landscape', unit: 'pt', format: [canvas.width, canvas.height] });
+  pdf.addImage(canvasImg, 'PNG', 0, 0, canvas.width, canvas.height);
+  pdf.save(`${name.replace(/\s+/g, '_')}_certificate.pdf`);
+});
+
+document.getElementById('show-preview-btn').addEventListener('click', () => {
+  drawCertificate({name: '', course: '', date: '', description: '', sig_left: '', sig_right: '', template: selectedTemplate});
+});
+</script>
+{% endblock %}

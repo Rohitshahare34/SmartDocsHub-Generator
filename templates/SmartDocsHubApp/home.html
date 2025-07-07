@@ -1,0 +1,213 @@
+{% extends 'SmartDocsHubApp/base.html' %}
+
+{% block content %}
+<!-- Hero Section -->
+<div class="container-fluid py-5 text-center hero-section mb-5" style="background: linear-gradient(120deg, #181a1b 80%, #00ffd0 200%); color: #fff; border-radius: 2rem; box-shadow: 0 8px 32px 0 rgba(0,255,208,0.10); margin-bottom: 2rem; position: relative; overflow: hidden;">
+  <h1 class="display-3 fw-bold mb-3" style="letter-spacing: 2px;">Create Any Document in 3 Steps</h1>
+  <p class="lead mb-4" style="font-size: 1.35em;">Choose a modern template, fill your details, see a live preview, and download your <span style="color:#00ffd0; font-weight:600;">Certificate</span>, <span style="color:#7c3aed; font-weight:600;">Invitation</span>, <span style="color:#00ffd0; font-weight:600;">Letter</span>, or <span style="color:#7c3aed; font-weight:600;">Report</span> instantly.</p>
+  <a href="#how-it-works" class="btn btn-lg btn-info shadow" style="font-size:1.3em; border-radius: 2em; padding: 0.7em 2.5em;">How it works</a>
+</div>
+<!-- How It Works Section -->
+<div class="container mb-5" id="how-it-works">
+  <h2 class="text-center mb-4">How it Works</h2>
+  <div class="row justify-content-center align-items-center g-4">
+    <div class="col-md-3 col-12">
+      <div class="glassy-card text-center p-4 h-100">
+        <div style="font-size:2.5em; color:#00ffd0;"><i class="bi bi-grid-3x3-gap"></i></div>
+        <h5 class="fw-bold mt-2 mb-1">1. Select a Template</h5>
+        <div>Pick from 3-4 modern designs for each document type.</div>
+      </div>
+    </div>
+    <div class="col-md-3 col-12">
+      <div class="glassy-card text-center p-4 h-100">
+        <div style="font-size:2.5em; color:#7c3aed;"><i class="bi bi-pencil-square"></i></div>
+        <h5 class="fw-bold mt-2 mb-1">2. Fill Your Details</h5>
+        <div>Enter names, event info, dates, and more in a simple form.</div>
+      </div>
+    </div>
+    <div class="col-md-3 col-12">
+      <div class="glassy-card text-center p-4 h-100">
+        <div style="font-size:2.5em; color:#00ffd0;"><i class="bi bi-eye"></i></div>
+        <h5 class="fw-bold mt-2 mb-1">3. Live Preview</h5>
+        <div>See your document update instantly as you type.</div>
+      </div>
+    </div>
+    <div class="col-md-3 col-12">
+      <div class="glassy-card text-center p-4 h-100">
+        <div style="font-size:2.5em; color:#7c3aed;"><i class="bi bi-download"></i></div>
+        <h5 class="fw-bold mt-2 mb-1">4. Download Instantly</h5>
+        <div>Get your certificate, invitation, letter, or report as PDF or image.</div>
+      </div>
+    </div>
+  </div>
+  <div class="row justify-content-center align-items-center g-4 mt-4">
+    <div class="col-md-3 col-12">
+      <div class="glassy-card text-center p-3 h-100" style="background:rgba(30,255,208,0.08) !important; border:1.5px dashed #00ffd0;">
+        <div style="font-size:2em; color:#00ffd0;"><i class="bi bi-upload"></i></div>
+        <h6 class="fw-bold mt-2 mb-1">Bulk Upload <span class="badge bg-info text-dark ms-1">Advanced</span></h6>
+        <div>Upload a list to generate many documents at once (Certificates/Invitations).</div>
+      </div>
+    </div>
+    <div class="col-md-3 col-12">
+      <div class="glassy-card text-center p-3 h-100" style="background:rgba(30,255,208,0.08) !important; border:1.5px dashed #00ffd0;">
+        <div style="font-size:2em; color:#7c3aed;"><i class="bi bi-envelope-paper"></i></div>
+        <h6 class="fw-bold mt-2 mb-1">Email Delivery <span class="badge bg-info text-dark ms-1">Advanced</span></h6>
+        <div>Send certificates or invitations directly by email in bulk.</div>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- Main Document Types Section -->
+<div class="container mb-5 mt-4" id="doc-types">
+  <h2 class="text-center mb-4">Choose Your Document Type</h2>
+  <div class="row justify-content-center g-4">
+    <div class="col-md-3 col-12">
+      <div class="card h-100 shadow-sm border-0 bg-dark text-light text-center glassy-card">
+        <div class="card-body d-flex flex-column justify-content-between">
+          <div style="font-size:2.5em; color:#00ffd0; margin-bottom:0.3em;"><i class="bi bi-award"></i></div>
+          <h4 class="card-title mb-2">Certificates</h4>
+          <p class="card-text mb-3">Select from 4 modern templates, fill details, preview, and download as PDF.</p>
+          <a href="/certificates/" class="btn btn-outline-info">Go to Certificates</a>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3 col-12">
+      <div class="card h-100 shadow-sm border-0 bg-dark text-light text-center glassy-card">
+        <div class="card-body d-flex flex-column justify-content-between">
+          <div style="font-size:2.5em; color:#7c3aed; margin-bottom:0.3em;"><i class="bi bi-envelope-open"></i></div>
+          <h4 class="card-title mb-2">Invitations</h4>
+          <p class="card-text mb-3">Choose from 3 creative templates, fill event info, preview, and download as image.</p>
+          <a href="/invitations/" class="btn btn-outline-info">Go to Invitations</a>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3 col-12">
+      <div class="card h-100 shadow-sm border-0 bg-dark text-light text-center glassy-card">
+        <div class="card-body d-flex flex-column justify-content-between">
+          <div style="font-size:2.5em; color:#00ffd0; margin-bottom:0.3em;"><i class="bi bi-bar-chart"></i></div>
+          <h4 class="card-title mb-2">Reports</h4>
+          <p class="card-text mb-3">Fill in your report, see a live preview, and download as image.</p>
+          <a href="/reports/" class="btn btn-outline-info">Go to Reports</a>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3 col-12">
+      <div class="card h-100 shadow-sm border-0 bg-dark text-light text-center glassy-card">
+        <div class="card-body d-flex flex-column justify-content-between">
+          <div style="font-size:2.5em; color:#7c3aed; margin-bottom:0.3em;"><i class="bi bi-file-earmark-text"></i></div>
+          <h4 class="card-title mb-2">Letters</h4>
+          <p class="card-text mb-3">Write your letter, preview it live, and download as image.</p>
+          <a href="/letters/" class="btn btn-outline-info">Go to Letters</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- Platform Info Section -->
+<div class="mb-5">
+  <h3 class="text-center mb-4">Why Choose This Platform?</h3>
+  <div class="row justify-content-center text-center">
+    <div class="col-md-4 mb-4">
+      <div class="p-4 border rounded bg-dark text-light h-100 glassy-card">
+        <h4 class="text-info mb-2"><i class="bi bi-layers-half"></i> All-in-One Solution</h4>
+        <p>Manage certificates, invitations, reports, and letters from a single, unified dashboard. No need for multiple tools or manual work.</p>
+      </div>
+    </div>
+    <div class="col-md-4 mb-4">
+      <div class="p-4 border rounded bg-dark text-light h-100 glassy-card">
+        <h4 class="text-info mb-2"><i class="bi bi-lightning-charge"></i> Bulk & Automated</h4>
+        <p>Upload your data once and generate hundreds of documents in seconds. Save time with automated email delivery and instant downloads.</p>
+      </div>
+    </div>
+    <div class="col-md-4 mb-4">
+      <div class="p-4 border rounded bg-dark text-light h-100 glassy-card">
+        <h4 class="text-info mb-2"><i class="bi bi-shield-lock"></i> Customizable & Secure</h4>
+        <p>Use your own templates, personalize every document, and rest easy knowing your data is never stored or shared.</p>
+      </div>
+    </div>
+  </div>
+  <div class="row justify-content-center text-center mt-3">
+    <div class="col-md-8">
+      <div class="p-4 border rounded bg-dark text-light glassy-card">
+        <h5 class="mb-2"><i class="bi bi-bullseye"></i> Our Mission</h5>
+        <p>To empower educators, event organizers, HR teams, and organizations of all sizes to create professional documents with zero hassle, zero cost, and maximum impact.</p>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- Use Cases Section -->
+<div class="mb-5">
+  <h3 class="text-center mb-4">Who Can Use This?</h3>
+  <div class="row text-center justify-content-center g-2">
+    <div class="col-md-2 col-6 mb-2"><i class="bi bi-mortarboard" style="color:#00ffd0;"></i><br>Teachers & Educators</div>
+    <div class="col-md-2 col-6 mb-2"><i class="bi bi-calendar-event" style="color:#7c3aed;"></i><br>Event Organizers</div>
+    <div class="col-md-2 col-6 mb-2"><i class="bi bi-people" style="color:#00ffd0;"></i><br>HR & Startups</div>
+    <div class="col-md-2 col-6 mb-2"><i class="bi bi-globe" style="color:#7c3aed;"></i><br>NGOs</div>
+    <div class="col-md-2 col-6 mb-2"><i class="bi bi-journal-text" style="color:#00ffd0;"></i><br>Training Institutes</div>
+    <div class="col-md-2 col-6 mb-2"><i class="bi bi-stars" style="color:#7c3aed;"></i><br>More...</div>
+  </div>
+</div>
+<!-- FAQ Section -->
+<div class="mb-5">
+  <h3 class="text-center mb-4">FAQs</h3>
+  <div class="accordion" id="faqAccordion">
+    <div class="accordion-item bg-dark text-light glassy-card">
+      <h2 class="accordion-header" id="faq1">
+        <button class="accordion-button collapsed bg-dark text-info fw-bold" type="button" data-bs-toggle="collapse" data-bs-target="#collapse1" aria-expanded="false" aria-controls="collapse1">
+          <i class="bi bi-question-circle me-2"></i>Is this platform free?
+        </button>
+      </h2>
+      <div id="collapse1" class="accordion-collapse collapse" aria-labelledby="faq1" data-bs-parent="#faqAccordion">
+        <div class="accordion-body">
+          Yes! All features are 100% free to use.
+        </div>
+      </div>
+    </div>
+    <div class="accordion-item bg-dark text-light glassy-card">
+      <h2 class="accordion-header" id="faq2">
+        <button class="accordion-button collapsed bg-dark text-info fw-bold" type="button" data-bs-toggle="collapse" data-bs-target="#collapse2" aria-expanded="false" aria-controls="collapse2">
+          <i class="bi bi-question-circle me-2"></i>Can I use my own templates?
+        </button>
+      </h2>
+      <div id="collapse2" class="accordion-collapse collapse" aria-labelledby="faq2" data-bs-parent="#faqAccordion">
+        <div class="accordion-body">
+          Yes, you can upload and use your own templates for certificates, invitations, and more.
+        </div>
+      </div>
+    </div>
+    <div class="accordion-item bg-dark text-light glassy-card">
+      <h2 class="accordion-header" id="faq3">
+        <button class="accordion-button collapsed bg-dark text-info fw-bold" type="button" data-bs-toggle="collapse" data-bs-target="#collapse3" aria-expanded="false" aria-controls="collapse3">
+          <i class="bi bi-question-circle me-2"></i>Is my data safe?
+        </button>
+      </h2>
+      <div id="collapse3" class="accordion-collapse collapse" aria-labelledby="faq3" data-bs-parent="#faqAccordion">
+        <div class="accordion-body">
+          Absolutely. Your data is never stored or shared. All processing happens securely in your browser or on your device.
+        </div>
+      </div>
+    </div>
+    <div class="accordion-item bg-dark text-light glassy-card">
+      <h2 class="accordion-header" id="faq4">
+        <button class="accordion-button collapsed bg-dark text-info fw-bold" type="button" data-bs-toggle="collapse" data-bs-target="#collapse4" aria-expanded="false" aria-controls="collapse4">
+          <i class="bi bi-question-circle me-2"></i>Can I send documents by email?
+        </button>
+      </h2>
+      <div id="collapse4" class="accordion-collapse collapse" aria-labelledby="faq4" data-bs-parent="#faqAccordion">
+        <div class="accordion-body">
+          Yes, you can send certificates and invitations directly by email in bulk.
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<style>
+.glassy-card {
+  background: rgba(30, 32, 40, 0.7) !important;
+  border-radius: 18px !important;
+  box-shadow: 0 8px 32px 0 rgba(0,255,208,0.10) !important;
+  backdrop-filter: blur(12px) !important;
+  border: 1px solid rgba(255,255,255,0.08) !important;
+}
+</style>
+{% endblock %} 
